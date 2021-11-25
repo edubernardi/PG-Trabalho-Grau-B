@@ -1,0 +1,8 @@
+﻿  Origem.cpp
+C:\Users\eduar\source\repos\PG2021-2\HelloFrameworkPOA\HelloFramework\Origem.cpp(56,25): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\eduar\source\repos\PG2021-2\HelloFrameworkPOA\HelloFramework\Origem.cpp(295,49): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\eduar\source\repos\PG2021-2\HelloFrameworkPOA\HelloFramework\Origem.cpp(303,49): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\eduar\source\repos\PG2021-2\HelloFrameworkPOA\HelloFramework\Origem.cpp(549,71): warning C4244: '=': conversion from 'float' to 'unsigned char', possible loss of data
+C:\Users\eduar\source\repos\PG2021-2\HelloFrameworkPOA\HelloFramework\Origem.cpp(550,75): warning C4244: '=': conversion from 'float' to 'unsigned char', possible loss of data
+C:\Users\eduar\source\repos\PG2021-2\HelloFrameworkPOA\HelloFramework\Origem.cpp(551,75): warning C4244: '=': conversion from 'float' to 'unsigned char', possible loss of data
+  HelloFramework.vcxproj -> C:\Users\eduar\Source\Repos\PG2021-2\HelloFrameworkPOA\Debug\HelloFramework.exe
