@@ -54,8 +54,8 @@ GLuint createSprite();
 const GLuint WIDTH = 800, HEIGHT = 600;
 const int nPoints = 100 + 1 + 1; //+centro +cópia do primeiro
 const float pi = 3.14159;
-Object lenas[9];
-Object lenaGrande;
+Object models[9];
+Object image;
 Object stickers[7];
 bool moving[7];
 string imagem;
@@ -117,9 +117,6 @@ int main()
 
 	// Compilando e buildando o programa de shader
 	Shader* shader = new Shader("./shaders/sprite.vs", "./shaders/sprite.fs");
-	//Shader* sprShader = new Shader("./shaders/animatedsprites.vs", "./shaders/animatedsprites.fs");
-	
-
 	Shader* shaders[7];
 	shaders[0] = new Shader("./shaders/sprite.vs", "./shaders/sprite a.fs");
 	shaders[1] = new Shader("./shaders/sprite.vs", "./shaders/sprite b.fs");
@@ -129,31 +126,31 @@ int main()
 	shaders[5] = new Shader("./shaders/sprite.vs", "./shaders/sprite g.fs");
 	shaders[6] = new Shader("./shaders/sprite.vs", "./shaders/sprite h.fs");
 	
-	for (int i = 0; i < 7; i++) {
-		lenas[i].initialize();
-		lenas[i].setPosition(glm::vec3(44.0 + 89.0 * i, 80.0, 0.0));
-		lenas[i].setDimensions(glm::vec3(85.0, 85, 1.0));
-		lenas[i].setTexture(texID);
-		lenas[i].setShader(shaders[i]);
+	//carregando e inicializando os modelos
+	for (int i = 0; i < 9; i++) {
+		models[i].initialize();
+		models[i].setPosition(glm::vec3(44.0 + 89.0 * i, 80.0, 0.0));
+		models[i].setDimensions(glm::vec3(85.0, 85, 1.0));
+		if (i == 7) {
+			models[7].setTexture(loadTextureBlur("./textures/" + imagem));
+			models[7].setShader(shader);
+		}
+		else if (i == 8) {
+			models[8].setTexture(loadTextureMirror("./textures/" + imagem));
+			models[8].setShader(shader);
+		}
+		else {
+			models[i].setTexture(texID);
+			models[i].setShader(shaders[i]);
+		}
 	}
-
-	lenas[7].initialize();
-	lenas[7].setPosition(glm::vec3(44.0 + 89.0 * 7, 80.0, 0.0));
-	lenas[7].setDimensions(glm::vec3(85.0, 85, 1.0));
-	lenas[7].setTexture(loadTextureBlur("./textures/" + imagem));
-	lenas[7].setShader(shader);
-
-	lenas[8].initialize();
-	lenas[8].setPosition(glm::vec3(44.0 + 89.0 * 8, 80.0, 0.0));
-	lenas[8].setDimensions(glm::vec3(85.0, 85, 1.0));
-	lenas[8].setTexture(loadTextureMirror("./textures/" + imagem));
-	lenas[8].setShader(shader);
-
-	lenaGrande.initialize();
-	lenaGrande.setPosition(glm::vec3(400.0, 300.0, 0.0));
-	lenaGrande.setDimensions(glm::vec3(300.0, 300, 1.0));
-	lenaGrande.setTexture(texID);
-	lenaGrande.setShader(shader);
+	
+	//carregando a imagem principal
+	image.initialize();
+	image.setPosition(glm::vec3(400.0, 300.0, 0.0));
+	image.setDimensions(glm::vec3(300.0, 300, 1.0));
+	image.setTexture(texID);
+	image.setShader(shader);
 
 	//Carregando stickers
 	for (int i = 0; i < 7; i++) {
@@ -165,17 +162,7 @@ int main()
 		stickers[i].setShader(shader);
 	}
 	
-	// Gerando um buffer simples, com a geometria de um triângulo
-	//GLuint VAO = setupGeometry();
 	GLuint VAO = createSprite();
-
-	//Ativando o shader que será usado
-
-	//shader->Use();
-
-	// Enviando a cor desejada (vec4) para o fragment shader
-	// Utilizamos a variáveis do tipo uniform em GLSL para armazenar esse tipo de info
-	// que não está nos buffers
 
 	GLint projLoc = glGetUniformLocation(shader->Program, "projection");
 	assert(projLoc > -1);
@@ -186,14 +173,10 @@ int main()
 
 	glm::mat4 model = glm::mat4(1);
 
-	//shader->setMat4("projection", glm::value_ptr(ortho)),
 
 	double xmin = 0.0, xmax = WIDTH, ymin = 0.0, ymax = HEIGHT;
 
-	//shader->Use();
-	//shader->setVec4("corColorizadora", 0.5, 0.0, 0.5, 1.0);
-
-// Loop da aplicação - "game loop"
+	// Loop da aplicação - "game loop"
 	while (!glfwWindowShouldClose(window))
 	{
 		// Checa se houveram eventos de input (key pressed, mouse moved etc.) e chama as funções de callback correspondentes
@@ -215,21 +198,20 @@ int main()
 			//Enviar a matriz de projeção ortográfica para o shader
 			glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(ortho));
 
-			lenas[i].update();
-			lenas[i].draw();
+			models[i].update();
+			models[i].draw();
 		}
 
-		lenas[7].update();
-		lenas[7].draw();
+		models[7].update();
+		models[7].draw();
 
-		lenas[8].update();
-		lenas[8].draw();
-
+		models[8].update();
+		models[8].draw();
 
 		shader->Use();
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(ortho));
-		lenaGrande.update();
-		lenaGrande.draw();
+		image.update();
+		image.draw();
 
 		for (int i = 0; i < 7; i++) {
 			shader->Use();
@@ -273,6 +255,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
 
+	//verificações para alterar o tamanho dos stickers
 	if (key == GLFW_KEY_UP && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
 		for (int i = 0; i < 7; i++) {
 			if (moving[i]) {
@@ -289,6 +272,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		}
 	}
 
+	//verificações para rotacionar os stickers
 	if (key == GLFW_KEY_RIGHT && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
 		for (int i = 0; i < 7; i++) {
 			if (moving[i]) {
@@ -322,22 +306,23 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 	//Verifica se alguma imagem modelo foi clicada
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
 		for (int i = 0; i < 9; i++) {
-			if (lenas[i].getBottomLeftVertex().x  < xpos && lenas[i].getTopRightVertex().x > xpos) {
-				if ((lenas[i].getBottomLeftVertex().y) < ypos && (lenas[i].getTopRightVertex().y) > ypos) {
+			if (models[i].getBottomLeftVertex().x  < xpos && models[i].getTopRightVertex().x > xpos) {
+				if ((models[i].getBottomLeftVertex().y) < ypos && (models[i].getTopRightVertex().y) > ypos) {
 					if (i == 8) {
-						lenaGrande.setTexture(loadTextureMirror("./textures/" + imagem));
+						image.setTexture(loadTextureMirror("./textures/" + imagem));
 					} else if (i == 7) {
-						lenaGrande.setTexture(loadTextureBlur("./textures/" + imagem));
+						image.setTexture(loadTextureBlur("./textures/" + imagem));
 					}
 					else {
-						lenaGrande.setTexture(loadTexture("./textures/" + imagem));
-						lenaGrande.setShader(lenas[i].getShader());
+						image.setTexture(loadTexture("./textures/" + imagem));
+						image.setShader(models[i].getShader());
 					}
 				}
 			}
 		}
 	}
 
+	//atualizando os valores no array alreadyMoving, que é utilizado para validar se existe um sticker em movimento e qual é
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
 		for (int i = 6; i >= 0; i--) {
 			if (stickers[i].getBottomLeftVertex().x  < xpos && stickers[i].getTopRightVertex().x > xpos) {
@@ -461,28 +446,6 @@ int loadTexture(string path)
 
 	if (data)
 	{
-		for (int i = 0; i < width * height * nrChannels; i += nrChannels)
-		{
-			//float media = data[i] * 0.2125 + data[i + 1] * 0.7154 + data[i + 2] * 0.0721;
-			//data[i] = media ; // R
-			//data[i + 1] = media; //G
-			//data[i + 2] = media; //B
-		//	//data[i+3] é o canal alpha, se houver
-
-			/*char corColorizadora[3];
-			corColorizadora[0] = 200;
-			corColorizadora[1] = 0;
-			corColorizadora[2] = 200;
-
-			data[i] = data[i] | corColorizadora[0];
-			data[i + 1] = data[i + 1] | corColorizadora[1];
-			data[i + 2] = data[i + 2] | corColorizadora[2];*/
-
-			/*data[i] = data[i] ^ 255;
-			data[i + 1] = data[i + 1] ^ 255;
-			data[i + 2] = data[i + 2] ^ 255;*/
-		}
-
 		if (nrChannels == 3) //jpg, bmp
 		{
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -602,9 +565,9 @@ int loadTextureMirror(string path)
 		for (int i = 0; i < height; i += 1)
 		{
 			for (int j = 0; j < width; j += 1) {
-				data[(i * width * nrChannels) + (nrChannels * j)] = dataTemp[(i * width * nrChannels) + (nrChannels * (width - j))];
-				data[(i * width * nrChannels) + (nrChannels * j) + 1] = dataTemp[(i * width * nrChannels) + (nrChannels * (width - j)) + 1];
-				data[(i * width * nrChannels) + (nrChannels * j) + 2] = dataTemp[(i * width * nrChannels) + (nrChannels * (width - j)) + 2];
+				data[(i * width * nrChannels) + (nrChannels * j)] = dataTemp[(i * width * nrChannels) + (nrChannels * (width - j - 1))];
+				data[(i * width * nrChannels) + (nrChannels * j) + 1] = dataTemp[(i * width * nrChannels) + (nrChannels * (width - j - 1)) + 1];
+				data[(i * width * nrChannels) + (nrChannels * j) + 2] = dataTemp[(i * width * nrChannels) + (nrChannels * (width - j - 1)) + 2];
 			}
 		}
 
